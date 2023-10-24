@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-deploy # deployment name, this should be a valid DNS name, avoid exsotic characters
+spec:
+  replicas: 10
+  selector: # defines the labels necessary for the deployment controller 
+            # to manage the pod, notice the app: hello-world label 
+            # matches that of the pod specified in the pod template below.
+    matchLabels:
+      app: hello-world 
+  revisionHistoryLimit: 5 # tells kubernetes how many historical replica sets to keep.
+                          # this provides more options when its time to rollback, but 
+                          # keeping too many can bloat the objest and will become and issue,
+                          # when deployed on a large cluster with many software releases. 
+  progressDeadlineSeconds: 300 # How long to wait during a rollout before kubernetes considers the rollout stalled. 
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: hello-world
+    spec:
+      containers:
+        - name: hello-pod
+          image: nigelpoulton/k8sbook:1.0
+          ports:
+            - containerPort: 80
+
